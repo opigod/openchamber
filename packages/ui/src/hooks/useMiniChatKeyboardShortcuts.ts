@@ -9,7 +9,7 @@ import { useUIStore } from '@/stores/useUIStore';
 import { useSessionUIStore } from '@/sync/session-ui-store';
 import { useSelectionStore } from '@/sync/selection-store';
 import { useKeybinds } from './useKeybind';
-import { hasActiveBtwComposer, hasOpenDropdown, isEditableEventTarget } from './keyboard-shortcut-dom';
+import { hasActiveBtwDialog, hasOpenDropdown, isEditableEventTarget } from './keyboard-shortcut-dom';
 import { useComposerAbortEscape } from './useComposerAbortEscape';
 import { useCurrentSessionActivity } from './useSessionActivity';
 import * as sessionActions from '@/sync/session-actions';
@@ -41,7 +41,7 @@ export const useMiniChatKeyboardShortcuts = () => {
   const dispatcher = dispatcherRef.current;
 
   const cycleFavoriteModel = (delta: number): boolean | void => {
-    if (hasActiveBtwComposer()) return false;
+    if (hasActiveBtwDialog()) return false;
     const { favoriteModels, hiddenModels, addRecentModel, setLastSelectedModel } = useUIStore.getState();
     const {
       providers,
@@ -89,18 +89,18 @@ export const useMiniChatKeyboardShortcuts = () => {
       focusChatInput();
     },
     open_model_selector: () => {
-      if (hasActiveBtwComposer()) return false;
+      if (hasActiveBtwDialog()) return false;
       const { isModelSelectorOpen, setModelSelectorOpen } = useUIStore.getState();
       setModelSelectorOpen(!isModelSelectorOpen);
     },
     cycle_thinking_variant: () => {
-      if (hasActiveBtwComposer()) return false;
+      if (hasActiveBtwDialog()) return false;
       if (!cycleThinkingVariant(useSessionUIStore.getState().currentSessionId)) return false;
     },
     cycle_favorite_model_forward: () => cycleFavoriteModel(1),
     cycle_favorite_model_backward: () => cycleFavoriteModel(-1),
     toggle_dictation: () => {
-      if (hasActiveBtwComposer()) return false;
+      if (hasActiveBtwDialog()) return false;
       // Same event the main app dispatches; ComposerDictation listens for it.
       window.dispatchEvent(new CustomEvent('openchamber:dictation-toggle'));
     },

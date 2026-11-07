@@ -17,6 +17,7 @@ type CapturedRequest = {
   method: string
   headers: Headers
   body: unknown
+  signal?: AbortSignal
 }
 
 const requests: CapturedRequest[] = []
@@ -35,6 +36,7 @@ const runtimeFetchMock = mock<RuntimeFetch>(async (input, init) => {
     method: String(init?.method ?? "GET").toUpperCase(),
     headers: new Headers(init?.headers),
     body: typeof init?.body === "string" ? JSON.parse(init.body) : undefined,
+    signal: init?.signal ?? undefined,
   }
   requests.push(request)
   const next = responses.shift()
@@ -1411,4 +1413,22 @@ describe("stopBackgroundShells", () => {
     ).rejects.toThrow("runtime changed")
     expect(requests.map((r) => r.url.pathname)).toEqual(["/api/session/ses_1/synthetic"])
   })
+})
+
+test("a transient side question posts the prompt and forwards its own abort signal", async () => {
+  const controller = new AbortController()
+  responses.push(json({ data: { text: "the fixture was stale" } }))
+
+  const text = await opencodeClient.generateSessionText("ses_1", "why did step 2 fail?", {
+    directory: "/repo/app",
+    signal: controller.signal,
+  })
+
+  expect(text).toBe("the fixture was stale")
+  expect(requests).toHaveLength(1)
+  expect(requests[0]?.method).toBe("POST")
+  expect(requests[0]?.url.pathname).toBe("/api/session/ses_1/generate")
+  expect(requests[0]?.body).toEqual({ prompt: "why did step 2 fail?" })
+  expect(requests[0]?.headers.get("x-opencode-directory")).toBe(encodeURIComponent("/repo/app"))
+  expect(requests[0]?.signal).toBe(controller.signal)
 })

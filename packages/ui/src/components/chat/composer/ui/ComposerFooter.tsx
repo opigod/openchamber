@@ -32,7 +32,7 @@ import { ComposerActionButtons } from './ComposerActionButtons';
 import { ComposerAttachmentControls, type ComposerTrackerPicker } from './ComposerAttachmentControls';
 import { PermissionAutoAcceptButton } from './PermissionAutoAcceptButton';
 import type { PermissionMode } from '@/stores/utils/permissionAutoAccept';
-import type { BtwSelection } from '@/stores/useBtwStore';
+import type { ComposerSelection } from '@/components/chat/composerSelection';
 
 const MemoModelControls = React.memo(ModelControls);
 const MemoComposerDictation = React.memo(ComposerDictation);
@@ -80,16 +80,10 @@ interface ComposerFooterProps {
     onDictationContentHeightChange: (height: number | null) => void;
     /** Desktop only: the composer box hides its other contents while the overlay is up. */
     onDictationActiveChange?: (active: boolean) => void;
-    isBtw?: boolean;
     /** Double Escape from this composer stops its run (abortShortcutReach); without it Stop stays visible beside Send. */
     escapeStops?: boolean;
-    modelSessionId?: string | null;
-    btwSelection: BtwSelection;
-    /** Whether the BTW model picker is open; the model shortcut toggles it. */
-    btwModelSelectorOpen?: boolean;
-    onBtwModelSelectorOpenChange?: (open: boolean) => void;
     /** A pinned column's own model, agent and effort (see pinnedComposerSelection.ts). */
-    pinnedSelection?: BtwSelection | null;
+    pinnedSelection?: ComposerSelection | null;
     /** Offers "Run on several models" in the model picker (desktop). */
     onRunInParallel?: () => void;
     /** Set while the composer is in "Run in parallel" mode: the primary action launches the run. */
@@ -153,12 +147,7 @@ function ComposerFooterView(props: ComposerFooterProps) {
         onDictationStart,
         onDictationContentHeightChange,
         onDictationActiveChange,
-        isBtw = false,
         escapeStops = false,
-        modelSessionId,
-        btwSelection,
-        btwModelSelectorOpen,
-        onBtwModelSelectorOpenChange,
         pinnedSelection = null,
         onRunInParallel,
         parallelRun = null,
@@ -200,11 +189,10 @@ function ComposerFooterView(props: ComposerFooterProps) {
                                 openGitHubPicker={onOpenGitHubPicker}
                                 repositoryProvider={repositoryProvider}
                                 trackerPickers={trackerPickers}
-                                onOpenSettings={isBtw ? undefined : onOpenSettings}
+                                onOpenSettings={onOpenSettings}
                                 onOpenMobileSheet={onOpenAttachSheet}
                                 attachGuests={attachGuests}
                                 onOpenGuestAttach={onOpenGuestAttach}
-                                filesOnly={isBtw}
                             />
                             <PermissionAutoAcceptButton
                                 footerIconButtonClass={footerIconButtonClass}
@@ -213,19 +201,19 @@ function ComposerFooterView(props: ComposerFooterProps) {
                                 permissionMode={permissionMode}
                                 handlePermissionModeCycle={onCyclePermissionMode}
                             />
-                            {!isBtw ? <SessionGoalButton
+                            <SessionGoalButton
                                 sessionId={currentSessionId}
                                 directory={directory}
                                 draftOpen={newSessionDraftOpen}
                                 footerIconButtonClass={footerIconButtonClass}
                                 iconSizeClass={iconSizeClass}
-                            /> : null}
-                            {!isBtw ? <SessionGoalObjectiveCounter length={messageLength} /> : null}
+                            />
+                            <SessionGoalObjectiveCounter length={messageLength} />
                         </div>
                         <div className="flex items-center min-w-0 gap-x-1 justify-end">
                             {waitingForOpenCode ? <OpenCodeStartupNote /> : null}
                             <div className="flex items-center gap-x-1 flex-shrink-0">
-                                {!isBtw && showDictation ? <Tooltip><TooltipTrigger asChild><button
+                                {showDictation ? <Tooltip><TooltipTrigger asChild><button
                                     type="button"
                                     className={footerIconButtonClass}
                                     // Keep the soft keyboard open (same guard as
@@ -273,10 +261,9 @@ function ComposerFooterView(props: ComposerFooterProps) {
                             openGitHubPicker={onOpenGitHubPicker}
                             repositoryProvider={repositoryProvider}
                             trackerPickers={trackerPickers}
-                            onOpenSettings={isBtw ? undefined : onOpenSettings}
+                            onOpenSettings={onOpenSettings}
                             attachGuests={attachGuests}
                             onOpenGuestAttach={onOpenGuestAttach}
-                            filesOnly={isBtw}
                         />
                         <PermissionAutoAcceptButton
                             footerIconButtonClass={footerIconButtonClass}
@@ -286,15 +273,15 @@ function ComposerFooterView(props: ComposerFooterProps) {
                             handlePermissionModeCycle={onCyclePermissionMode}
                             withTooltip
                         />
-                        {!isBtw ? <SessionGoalButton
+                        <SessionGoalButton
                             sessionId={currentSessionId}
                             directory={directory}
                             draftOpen={newSessionDraftOpen}
                             footerIconButtonClass={footerIconButtonClass}
                             iconSizeClass={iconSizeClass}
                             withTooltip
-                        /> : null}
-                        {!isBtw ? <SessionGoalObjectiveCounter length={messageLength} /> : null}
+                        />
+                        <SessionGoalObjectiveCounter length={messageLength} />
                     </div>
                     {/* Three groups, set apart by their gaps: the model unit and the
                         agent (16px), then 20px to the action pair (both inside
@@ -303,8 +290,8 @@ function ComposerFooterView(props: ComposerFooterProps) {
                         VS Code keeps its own tighter row. */}
                     <div className={cn('flex items-center flex-1 justify-end', isVSCode ? cn(footerGapClass, 'md:gap-x-3') : 'gap-x-2')} data-dictation-chain="true">
                         {waitingForOpenCode ? <OpenCodeStartupNote className="flex-shrink-0" /> : null}
-                        {parallelRun ? <MemoModelControls className={cn('flex-1 min-w-0')} agentOnly /> : isBtw ? <ModelControls className={cn('flex-1 min-w-0 justify-end')} sessionId={modelSessionId ?? null} selection={btwSelection} rememberVariantPicks={false} modelSelectorOpen={btwModelSelectorOpen} onModelSelectorOpenChange={onBtwModelSelectorOpenChange} /> : pinnedSelection ? <ModelControls className={cn('flex-1 min-w-0 justify-end')} sessionId={currentSessionId} selection={pinnedSelection} rememberVariantPicks /> : <MemoModelControls className={cn('flex-1 min-w-0 justify-end')} onRunInParallel={onRunInParallel} />}
-                        {!isBtw ? <MemoComposerDictation
+                        {parallelRun ? <MemoModelControls className={cn('flex-1 min-w-0')} agentOnly /> : pinnedSelection ? <ModelControls className={cn('flex-1 min-w-0 justify-end')} sessionId={currentSessionId} selection={pinnedSelection} rememberVariantPicks /> : <MemoModelControls className={cn('flex-1 min-w-0 justify-end')} onRunInParallel={onRunInParallel} />}
+                        <MemoComposerDictation
                             radius={chatInputRadius}
                             isMobile={isMobile}
                             footerIconButtonClass={footerIconButtonClass}
@@ -317,7 +304,7 @@ function ComposerFooterView(props: ComposerFooterProps) {
                             onStart={onDictationStart}
                             onContentHeightChange={onDictationContentHeightChange}
                             onActiveChange={onDictationActiveChange}
-                        /> : null}
+                        />
                         {parallelRun ? (
                             // Parallel mode keeps the ordinary send button: the strip above
                             // already shows how many runs start, and submitting the form
