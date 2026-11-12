@@ -11,6 +11,7 @@ import {
 import { Icon } from '@/components/icon/Icon';
 import { Spinner } from '@/components/ui/spinner';
 import { toast } from '@/components/ui';
+import { copyTextToClipboard } from '@/lib/clipboard';
 import { SimpleMarkdownRenderer } from '@/components/chat/MarkdownRenderer';
 import { isIMECompositionEvent } from '@/lib/ime';
 import { getRuntimeKey } from '@/lib/runtime-switch';
@@ -90,14 +91,10 @@ const BtwDialogContent: React.FC<BtwDialogProps & { request: BtwRequest }> = ({
 
   const copyAnswer = () => {
     if (!request.answer) return;
-    if (!navigator.clipboard?.writeText) {
-      toast.error(t('terminalView.toast.copyFailed'));
-      return;
-    }
-    void navigator.clipboard.writeText(request.answer).then(
-      () => setCopied(true),
-      () => toast.error(t('terminalView.toast.copyFailed')),
-    );
+    void copyTextToClipboard(request.answer).then((result) => {
+      if (result.ok) setCopied(true);
+      else toast.error(t('terminalView.toast.copyFailed'));
+    });
   };
 
   const failure = request.failure ? failureText(request.failure, t) : undefined;
@@ -123,6 +120,7 @@ const BtwDialogContent: React.FC<BtwDialogProps & { request: BtwRequest }> = ({
           <div className="flex flex-col gap-3">
             <textarea
               ref={inputRef}
+              autoFocus
               value={request.draft}
               onChange={(event) => setDraft(parentSessionId, event.target.value)}
               onKeyDown={(event) => {
