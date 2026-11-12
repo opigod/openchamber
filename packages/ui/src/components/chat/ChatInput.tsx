@@ -1550,7 +1550,6 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
         sessionId: shownSessionId,
         setMessage,
         focus: focusComposer,
-        holdSlashCommand: isBtwActive,
         onSlashCommand: leaveShellMode,
     });
 
@@ -3380,7 +3379,7 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
         // Issue and PR links are read only when the text lands in the composer,
         // not when a large paste goes as a file.
         const readLinksOfPaste = (text: string) => {
-            if (!isVSCodeRuntime() && inputMode === 'normal' && !isBtwActive) void readPastedReferenceLinks(text);
+            if (!isVSCodeRuntime() && inputMode === 'normal') void readPastedReferenceLinks(text);
         };
 
         // Pasting a URL over a selection wraps it as a markdown link:
@@ -3595,7 +3594,7 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
 
         e.preventDefault();
         await attachFilesWithCitation([...imageFiles, ...otherFiles], pastedText);
-    }, [addAttachedFile, attachFilesWithCitation, currentSessionId, inputMode, largeTextPasteBehavior, largeTextPasteGesture, readLargeTextPasteSnapshot, markFileMentionPasteSuppression, message, mobileShell, newSessionDraftOpen, insertTextAtSelection, setMessage, t, updateAutocompleteState, resolveSessionLinks, sessionLinkOrigins, pastedSessionIds, isBtwActive, readPastedReferenceLinks]);
+    }, [addAttachedFile, attachFilesWithCitation, currentSessionId, inputMode, largeTextPasteBehavior, largeTextPasteGesture, readLargeTextPasteSnapshot, markFileMentionPasteSuppression, message, mobileShell, newSessionDraftOpen, insertTextAtSelection, setMessage, t, updateAutocompleteState, resolveSessionLinks, sessionLinkOrigins, pastedSessionIds, readPastedReferenceLinks]);
 
     // Android commits an image through the IME instead of the page (see nativeImagePaste).
     React.useEffect(() => {
@@ -4289,7 +4288,7 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
     // Whether double Escape can stop this composer's run; where it cannot,
     // the action button keeps a visible Stop beside Send (abortShortcutReach).
     const abortShortcutReaches = abortShortcutReachesComposer({
-        surface: isBtwActive ? 'btw' : isMiniChatSurface ? 'mini-chat' : chatSurfaceMode === 'default' ? 'main' : 'unknown',
+        surface: isMiniChatSurface ? 'mini-chat' : chatSurfaceMode === 'default' ? 'main' : 'unknown',
         touch: isMobile || isTouchOnlyInput(),
     });
     const showDesktopDraftPresentation = (newSessionDraftOpen || draftPresentationExiting)
@@ -4611,7 +4610,7 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
         : null;
     // A folder the user declined to trust loads no agent or model; the row
     // brings the prompt back. A missing folder says more, so it wins.
-    const trustPausedRow = trustPausedDirectory && !folderMissingRow && !isBtwActive
+    const trustPausedRow = trustPausedDirectory && !folderMissingRow
         ? <SessionTrustPausedRow directory={trustPausedDirectory} />
         : null;
     const composerTopRows = folderMissingRow || trustPausedRow || worktreeSetupRow || creatingSessionRow || spaceWaitRow || goalRow || autoReviewRow || prWatchRow || extensionWaitRow || backgroundShellsRow || revertRow || queueRow || doneHintRow || reviewHintRow || suggestionRow ? (

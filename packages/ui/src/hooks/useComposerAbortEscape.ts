@@ -47,7 +47,7 @@ export const useComposerAbortEscape = (options: Options) => {
     if (event.key !== 'Escape') return;
     const target = event.target instanceof Element ? event.target : null;
     const fromComposer = Boolean(target?.closest('[data-chat-input="true"]'))
-      && !target?.closest('[data-btw-composer="true"]');
+      && !target?.closest('[data-btw-dialog="true"]');
     if (!target || event.defaultPrevented || !fromComposer || isIMECompositionEvent(event)) {
       reset();
       return;
