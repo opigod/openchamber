@@ -2023,7 +2023,11 @@ const ChatInputComponent: React.FC<ChatInputProps> = ({
         // `/btw` opens locally and its answer comes from the parent session on
         // the server. Neither the composer's auth, folder, model nor space
         // gates apply to it.
-        if (commandPlan?.kind === 'action' && commandPlan.command.name === 'btw' && currentSessionId) {
+        if (commandPlan?.kind === 'action' && commandPlan.command.name === 'btw') {
+            if (!currentSessionId) {
+                toast.error(t('chat.chatInput.toast.openSessionFirst'));
+                return;
+            }
             clearActionComposer();
             const question = commandPlan.command.argument.trim();
             const targetDirectory = currentSessionDirectoryForSync ?? currentDirectory ?? null;

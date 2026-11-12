@@ -186,7 +186,10 @@ export function planLocalSlashCommand(
     if (!command) return null;
 
     if (LOCAL_ACTION_COMMANDS.has(command.name)) {
-        if (!hasSession) return null;
+        // `/btw` is planned even without a session, so the composer can keep
+        // it local and explain that there is no conversation to ask about.
+        // Sending it as a prompt would create the session it must not create.
+        if (!hasSession && command.name !== 'btw') return null;
 
         return {
             command,

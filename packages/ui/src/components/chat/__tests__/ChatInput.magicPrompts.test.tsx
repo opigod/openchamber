@@ -244,6 +244,20 @@ test('/btw opens the side-question composer without sending a chat message', asy
   expect(sent).toEqual([]);
 });
 
+test('/btw in a new-session draft stays local and sends nothing', async () => {
+  const remaining = await submitInComposer('/btw why?', undefined, () => {
+    useSessionUIStore.setState((state) => ({
+      currentSessionId: null,
+      currentSessionDirectory: null,
+      newSessionDraft: { ...state.newSessionDraft, open: true, target: 'chat' },
+    }));
+  });
+
+  expect(sent).toEqual([]);
+  expect(remaining).toBe('/btw why?');
+  expect(useBtwStore.getState().byParent).toEqual({});
+});
+
 test("sends the command with the prompts that apply in the session's directory", async () => {
   await submitInComposer('/workspace-review');
 

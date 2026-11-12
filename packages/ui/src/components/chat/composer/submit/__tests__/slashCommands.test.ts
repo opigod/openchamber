@@ -100,6 +100,14 @@ describe('planLocalSlashCommand', () => {
         }
     });
 
+    test('/btw stays local without a session instead of creating one', () => {
+        expect(planLocalSlashCommand('/btw why?', 'normal', false, false)).toEqual({
+            command: { name: 'btw', argument: 'why?' },
+            kind: 'action',
+            attachedContext: 'none',
+        });
+    });
+
     test('shell mode and server-owned commands stay outside local planning', () => {
         expect(planLocalSlashCommand('/compact', 'shell', true, true)).toBeNull();
         expect(planLocalSlashCommand('/project-command', 'normal', true, true)).toBeNull();
